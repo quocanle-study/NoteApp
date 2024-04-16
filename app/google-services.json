@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "226058557084",
+    "firebase_url": "https://noteapp-mobiledesign-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "noteapp-mobiledesign",
+    "storage_bucket": "noteapp-mobiledesign.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:226058557084:android:e948bd0a82ed91267abf59",
+        "android_client_info": {
+          "package_name": "com.quocanle.noteapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcTBQ19LH6E55L2S70oAHttg4vD-vjmR0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
