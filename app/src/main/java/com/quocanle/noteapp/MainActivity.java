@@ -1,11 +1,17 @@
 package com.quocanle.noteapp;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -97,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String id = myRef.push().getKey();
-                String author = "Quoc An Le";
+                String author = mAuth.getUid();
                 String title = bindingAddNote.etTitle.getText().toString();
                 String content = bindingAddNote.etContent.getText().toString();
 
@@ -193,6 +199,118 @@ public class MainActivity extends AppCompatActivity {
 //                holder.binding.layoutNote.setBackgroundColor(Color.argb(255, new Random().nextInt(256), new Random().nextInt(256), new Random().nextInt(256)));
 
                 holder.binding.layoutNote.setBackgroundColor(Color.parseColor(model.getColor()));
+
+                holder.binding.layoutNote.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialog.Builder mDialog = new AlertDialog.Builder(MainActivity.this);
+                        LayoutInflater inflater = MainActivity.this.getLayoutInflater();
+                        AddNoteBinding bindingAddNote = AddNoteBinding.inflate(getLayoutInflater());
+                        mDialog.setView(bindingAddNote.getRoot());
+
+                        bindingAddNote.etTitle.setText(model.getTitle());
+                        bindingAddNote.etContent.setText(model.getContent());
+
+                        AlertDialog dialog = mDialog.create();
+                        dialog.setCancelable(true);
+
+                        bindingAddNote.btnSave.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                String id = model.getId();
+                                String author = mAuth.getUid();
+                                String title = bindingAddNote.etTitle.getText().toString();
+                                String content = bindingAddNote.etContent.getText().toString();
+
+                                myRef.child(id).setValue(new Post(id, author, title, content, model.getColor()) {
+
+                                })
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Toast.makeText(MainActivity.this, "Note updated", Toast.LENGTH_SHORT).show();
+                                                } else {
+                                                    Toast.makeText(MainActivity.this, "Failed to update note", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+                                dialog.dismiss();
+                            }
+                        });
+
+                        dialog.show();
+                    }
+                });
+
+                holder.binding.ivAction.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        PopupMenu popupMenu = new PopupMenu(v.getContext(), v);
+                        popupMenu.setGravity(Gravity.END);
+                        popupMenu.getMenu().add("Edit").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                            @Override
+                            public boolean onMenuItemClick(MenuItem item) {
+                                AlertDialog.Builder mDialog = new AlertDialog.Builder(MainActivity.this);
+                                LayoutInflater inflater = MainActivity.this.getLayoutInflater();
+                                AddNoteBinding bindingAddNote = AddNoteBinding.inflate(getLayoutInflater());
+                                mDialog.setView(bindingAddNote.getRoot());
+
+                                bindingAddNote.etTitle.setText(model.getTitle());
+                                bindingAddNote.etContent.setText(model.getContent());
+
+                                AlertDialog dialog = mDialog.create();
+                                dialog.setCancelable(true);
+
+                                bindingAddNote.btnSave.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        String id = model.getId();
+                                        String author = mAuth.getUid();
+                                        String title = bindingAddNote.etTitle.getText().toString();
+                                        String content = bindingAddNote.etContent.getText().toString();
+
+                                        myRef.child(id).setValue(new Post(id, author, title, content, model.getColor()) {
+
+                                        })
+                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if (task.isSuccessful()) {
+                                                            Toast.makeText(MainActivity.this, "Note updated", Toast.LENGTH_SHORT).show();
+                                                        } else {
+                                                            Toast.makeText(MainActivity.this, "Failed to update note", Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    }
+                                                });
+                                        dialog.dismiss();
+                                    }
+                                });
+
+                                dialog.show();
+                                return true;
+                            }
+                        });
+                        popupMenu.getMenu().add("Delete").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                            @Override
+                            public boolean onMenuItemClick(MenuItem item) {
+                                myRef.child(model.getId()).removeValue()
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Toast.makeText(MainActivity.this, "Note deleted", Toast.LENGTH_SHORT).show();
+                                                } else {
+                                                    Toast.makeText(MainActivity.this, "Failed to delete note", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+                                return true;
+                            }
+                        });
+                        popupMenu.show();
+                    }
+                });
             }
 
         };
@@ -269,5 +387,24 @@ public class MainActivity extends AppCompatActivity {
 
     protected void logout() {
         mAuth.signOut();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.menu_logout) {
+            mAuth.signOut();
+            Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
